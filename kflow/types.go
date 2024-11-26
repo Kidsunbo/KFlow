@@ -1,7 +1,7 @@
 package kflow
 
 type INode interface {
-	Name() string	
+	Name() string
 }
 
 type IMiddleware interface {
@@ -11,8 +11,4 @@ type IMiddleware interface {
 
 type IRunnable interface {
 	Run() error
-}
-
-type ILoader interface {
-	Load() error
 }
