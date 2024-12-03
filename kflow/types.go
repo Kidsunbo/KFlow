@@ -1,14 +1,6 @@
 package kflow
 
-type INode interface {
-	Name() string
-}
+import "kflow/kflow/impl"
 
-type IMiddleware interface {
-	Before() error
-	After() error
-}
-
-type IRunnable interface {
-	Run() error
-}
+type INode = impl.INode
+type IMiddleware = impl.IMiddleware
