@@ -1,6 +1,9 @@
 package utils
 
-import "reflect"
+import (
+	"fmt"
+	"reflect"
+)
 
 func DeferenceToNonePtr(t reflect.Type) (reflect.Type, int) {
 	if t.Kind() != reflect.Pointer {
@@ -9,8 +12,8 @@ func DeferenceToNonePtr(t reflect.Type) (reflect.Type, int) {
 	i := 0
 	for t.Kind() == reflect.Pointer {
 		i++
-		if i == 10 {
-			panic("pointer is too deep")
+		if i == 11 {
+			panic(fmt.Sprintf(ErrorMessage(PointerTooDeep), 10))
 		}
 		t = t.Elem()
 	}

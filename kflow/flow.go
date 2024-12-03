@@ -1,6 +1,9 @@
 package kflow
 
-import "context"
+import (
+	"context"
+	"kflow/kflow/utils"
+)
 
 type Flow[T any] struct {
 	ctx context.Context
@@ -10,4 +13,12 @@ type Flow[T any] struct {
 
 func (* Flow[T]) Run() error {
 	panic("unimplement")
+}
+
+func ReportErrorInEnglish(){
+	utils.SetLanguageIndex(2)
+}
+
+func ReportErrorInChinese(){
+	utils.SetLanguageIndex(1)
 }

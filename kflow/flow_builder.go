@@ -23,7 +23,12 @@ func NewFlowBuilder[T any]() *FlowBuilder[T] {
 
 func Add[T INode, R any](f *FlowBuilder[R], constructor impl.NodeConstructor[T]) {
 	var output T
-	nodeType, ptrDepth := utils.DeferenceToNonePtr(reflect.TypeOf(output))
+	rawType := reflect.TypeOf(&output).Elem()
+	nodeType, ptrDepth := utils.DeferenceToNonePtr(rawType)
+	if nodeType.Kind() == reflect.Interface {
+		panic(utils.ErrorMessage(utils.InterfaceAsReturnValueOfConstructor))
+	}
+
 	constructorWrapper := func(ctx context.Context) INode {
 		return constructor(ctx)
 	}
@@ -83,7 +88,7 @@ func (f *FlowBuilder[T]) parseField(nodeName string, fieldType reflect.StructFie
 	fieldName := fieldType.Name
 
 	if !fieldType.IsExported() {
-		panic(fmt.Sprintf("%v.%v is not a public field", nodeName, fieldName))
+		panic(fmt.Sprintf(utils.ErrorMessage(utils.FieldIsNotExported), nodeName, fieldName))
 	}
 
 	tagString := fieldType.Tag.Get("k")
@@ -107,14 +112,14 @@ func (f *FlowBuilder[T]) parseTag(nodeName, fieldName, value string) *impl.Tag {
 	for _, item := range items {
 		parts := strings.SplitN(item, ":", 2)
 		if len(parts) != 2 {
-			panic(fmt.Sprintf("field (%v) in node (%v) has invalid tag (%v)", fieldName, nodeName, value))
+			panic(fmt.Sprintf(utils.ErrorMessage(utils.InvalidTag), fieldName, nodeName, value))
 		}
 		allTags[strings.Trim(parts[0], " ")] = strings.Trim(parts[1], " ")
 	}
 
 	tagType := allTags["type"]
 	if tagType == "" {
-		panic(fmt.Sprintf("%v.%v misses type in tag", nodeName, fieldName))
+		panic(fmt.Sprintf(utils.ErrorMessage(utils.MissingTypeInTag), nodeName, fieldName))
 	}
 	switch tagType {
 	case "auto":
@@ -124,7 +129,7 @@ func (f *FlowBuilder[T]) parseTag(nodeName, fieldName, value string) *impl.Tag {
 	case "delay":
 		f.fillTagForDelay(t, allTags)
 	default:
-		panic(fmt.Sprintf("%v.%v has unsupported type %v in tag", nodeName, fieldName, tagType))
+		panic(fmt.Sprintf(utils.ErrorMessage(utils.UnsupportedTagType), nodeName, fieldName, tagType))
 	}
 
 	return t
